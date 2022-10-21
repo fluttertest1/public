@@ -23,6 +23,16 @@
             ['ற்','ற','றா','றி','றீ','று','றூ','றெ','றே','றை','றொ','றோ','றௌ'],
             ['ன்','ன','னா','னி','னீ','னு','னூ','னெ','னே','னை','னொ','னோ','னௌ'],
         ];
+        const newspaperSpinning = [
+            { transform: 'rotate(0) scale(0)' },
+            { transform: 'rotate(0deg) scale(1)' }
+        ];
+
+        const newspaperTiming = {
+            duration: 2000,
+            iterations: 1,
+        }
+
         var noOfChars = 1;
         var automatic;
         var speed;
@@ -31,10 +41,11 @@
             setAutomatic();
             setSpeed();
             readJson();
+            //document.getElementById('panel').addEventListener("animationend", function() {console.log('Animation ended');}, false);
         };
-        function getWords() {
-            noOfChars = parseInt(document.getElementById('inNoChars').value);
-            document.getElementById('panel').style.minWidth = (noOfChars * 300) + 'px';
+        function getWord() {
+            noOfChars = getNumberOfChars();
+            setPanelWidth();
             var strVal = '';
             if (noOfChars == 1) {
                 for (i = 0; i < noOfChars; i++) {
@@ -47,19 +58,36 @@
                 var pointer = getRandomInt(1, tmpData.length - 1);
                 strVal = tmpData[pointer];
             }
-            document.getElementById('panel').innerText = strVal;
+            setWord(strVal);
+            //document.getElementById('panel').animate(newspaperSpinning, newspaperTiming);
         };
-        function getFunnyWords() {
-            noOfChars = getRandomInt(1, 4);
-            document.getElementById('panel').style.minWidth = (noOfChars * 300) + 'px';
+        function setNumberOfChars() {
+            setPanelWidth();
+        };
+        function getNumberOfChars() {
+            return parseInt(document.getElementById('inNoChars').value);
+        };
+        function setPanelWidth() {
+            noOfChars = getNumberOfChars();
+            let width = (noOfChars * 300) + 'px';
+            document.getElementById('panel').style.minWidth = width;
+            document.getElementById('translatePanel').style.minWidth = width;
+        };
+        function getFunnyWord() {
+            //noOfChars = getRandomInt(1, 4);
+            noOfChars = getNumberOfChars();
+            //setPanelWidth();
             var strVal = '';
             for (i = 0; i < noOfChars; i++) {
                 var col = getRandomInt(1, 12);
                 var row = getRandomInt(1, 18);
                 strVal = strVal + letters[row][col];
             }
-            document.getElementById('panel').innerText = strVal;
-            readJson();
+            setWord(strVal);
+        };
+        function setWord(word) {
+            document.getElementById('panel').innerText = word;
+            document.getElementById('translatePanel').innerText = '';
         };
         function getRandomInt(min, max) {
             min = Math.ceil(min);
@@ -86,18 +114,34 @@
             fetch('https://raw.githubusercontent.com/fluttertest1/public/main/tamil.txt')
             .then(res => res.text())
             .then((out) => {
-                console.log('Checkout this JSON! ', out);
+                console.log('Words JSON! ', out);
                 data = JSON.parse(out)
             })
             .catch(err => { throw err });
         };
+        function showTranslation() {
+            let word = document.getElementById('panel').innerText;
+            if (!word) {
+                return;
+            }
+            fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=ta&tl=en&dt=t&q=${word}`)
+            .then(res => res.text())
+            .then((out) => {
+                translated_data = JSON.parse(out)
+                tranlatedWord = translated_data[0][0][0];
+                console.log('English word ' + tranlatedWord);
+                document.getElementById('translatePanel').innerText = tranlatedWord;
+            })
+            .catch(err => { throw err });
+        };
+        // Sliding animation http://jsfiddle.net/jPneT/208/
     </script>
 </head>
 <body onload="initialize()" style="background-color: #2638c4;">
     <div style="text-align: center;padding-top: 100px;color: white;font-size: 25px;">
         <span > 
             Number of Characters: 
-            <select id="inNoChars" style="height: 30px;width: 40px;">
+            <select id="inNoChars" style="height: 30px;width: 40px;" onchange="setNumberOfChars()">
                 <option value="1">1</option>
                 <option value="2">2</option>
                 <option value="3">3</option>
@@ -110,12 +154,15 @@
             <input type="range" id="speed" name="speed" min="1" max="10" value="5" onclick="setSpeed()">
             <br/>
             <br/>
-            <input type="button" onclick="getWords()" value="Show words" id="showChars" style="font-size: 25px;">
+            <input type="button" onclick="getWord()" value="Show words" id="showChars" style="font-size: 25px;">
             &nbsp;&nbsp;
-            <input type="button" onclick="getFunnyWords()" value="Show funny words" id="showChars" style="font-size: 25px;">
+            <input type="button" onclick="getFunnyWord()" value="Show a funny word" id="showChars" style="font-size: 25px;">
+            &nbsp;&nbsp;
+            <input type="button" onclick="showTranslation()" value="Show meaning" id="showChars" style="font-size: 25px;">
         </span>
         <br/><br/><br/><br/>
-        <span id="panel" STYLE="font-size: 100px; border: 2px solid rgb(200, 200, 200); background-color: #0f1209;padding: 35px;display: inline-block;min-width: 300px;min-height: 200px;"></span>
+        <span id="panel" STYLE="font-size: 100px; border: 2px solid rgb(200, 200, 200); background-color: #0f1209;padding: 35px;display: inline-block;min-width: 300px;min-height: 200px;"></span><br><br>
+        <span id="translatePanel" STYLE="font-size: 100px; border: 2px solid rgb(200, 200, 200); background-color: #0f1209;padding: 35px;display: inline-block;min-width: 300px;min-height: 200px;"></span>
     </div>
 
 </body>
