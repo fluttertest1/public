@@ -33,11 +33,12 @@
             duration: 2000,
             iterations: 1,
         }
-
+        const B_IDS = ['showChars','showVaria','showFunny', 'showTranslate'];
         var noOfChars = 1;
         var automatic;
         var speed;
         var data;
+        var mode;
         function initialize() {
             setAutomatic();
             setSpeed();
@@ -45,6 +46,7 @@
             //document.getElementById('panel').addEventListener("animationend", function() {console.log('Animation ended');}, false);
         };
         function getWord() {
+            //document.getElementById('panel').style.animation = 'fading 2s infinite';
             noOfChars = getNumberOfChars();
             setPanelWidth();
             var strVal = '';
@@ -59,20 +61,15 @@
                 var pointer = getRandomInt(1, tmpData.length - 1);
                 strVal = tmpData[pointer];
             }
-            setWord(strVal);
+            setWord(strVal, 'W');
             //document.getElementById('panel').animate(newspaperSpinning, newspaperTiming);
         };
-        function setNumberOfChars() {
-            setPanelWidth();
-        };
-        function getNumberOfChars() {
-            return parseInt(document.getElementById('inNoChars').value);
-        };
-        function setPanelWidth() {
-            noOfChars = getNumberOfChars();
-            let width = (noOfChars * 300) + 'px';
-            document.getElementById('panel').style.minWidth = width;
-            document.getElementById('translatePanel').style.minWidth = width;
+        function getVariations() {
+            var col = getRandomInt(1, 12);
+            var row = getRandomInt(1, 18);
+            var baseChar = letters[row][1];
+            var charVariation = letters[row][col];
+            setWord(charVariation, 'V', baseChar);
         };
         function getFunnyWord() {
             //noOfChars = getRandomInt(1, 4);
@@ -84,11 +81,27 @@
                 var row = getRandomInt(1, 18);
                 strVal = strVal + letters[row][col];
             }
-            setWord(strVal);
+            setWord(strVal, 'F');
         };
-        function setWord(word) {
+        function setNumberOfChars() {
+            setPanelWidth();
+        };
+        function getNumberOfChars() {
+            return parseInt(document.getElementById('inNoChars').value);
+        };
+        function setMode(modeValue) {
+            mode = modeValue;
+        };
+        function setPanelWidth() {
+            noOfChars = getNumberOfChars();
+            let width = (noOfChars * 300) + 'px';
+            document.getElementById('panel').style.minWidth = width;
+            document.getElementById('translatePanel').style.minWidth = width;
+        };
+        function setWord(word, modeValue, secondWord='') {
             document.getElementById('panel').innerText = word;
-            document.getElementById('translatePanel').innerText = '';
+            document.getElementById('translatePanel').innerText = secondWord;
+            setMode(modeValue);
         };
         function getRandomInt(min, max) {
             min = Math.ceil(min);
@@ -97,7 +110,9 @@
         };
         function setAutomatic() {
             automatic = document.getElementById('automatic').checked;
-            document.getElementById('showChars').disabled = automatic;
+            for (eid in B_IDS) {
+                document.getElementById(B_IDS[eid]).disabled = automatic;
+            }
             if (automatic) {
                 showCharsAutomatically();
             }
@@ -108,7 +123,7 @@
         function showCharsAutomatically() {
             if (automatic) {
                 setTimeout(showCharsAutomatically, (11 - speed) * 600);
-                getWords();
+                getWord();
             }
         };
         function readJson() {
@@ -155,11 +170,13 @@
             <input type="range" id="speed" name="speed" min="1" max="10" value="5" onclick="setSpeed()">
             <br/>
             <br/>
-            <input type="button" onclick="getWord()" value="Show words" id="showChars" style="font-size: 25px;">
+            <input type="button" onclick="getWord()" value="Show a word" id="showChars" style="font-size: 25px;">
             &nbsp;&nbsp;
-            <input type="button" onclick="getFunnyWord()" value="Show a funny word" id="showChars" style="font-size: 25px;">
+            <input type="button" onclick="getVariations()" value="Character variations" id="showVaria" style="font-size: 25px;">
             &nbsp;&nbsp;
-            <input type="button" onclick="showTranslation()" value="Show meaning" id="showChars" style="font-size: 25px;">
+            <input type="button" onclick="getFunnyWord()" value="Funny word" id="showFunny" style="font-size: 25px;">
+            &nbsp;&nbsp;
+            <input type="button" onclick="showTranslation()" value="Show meaning" id="showTranslate" style="font-size: 25px;">
         </span>
         <br/><br/><br/><br/>
         <span id="panel" STYLE="font-size: 100px; border: 2px solid rgb(200, 200, 200); background-color: #0f1209;padding: 35px;display: inline-block;min-width: 300px;min-height: 200px;"></span><br><br>
