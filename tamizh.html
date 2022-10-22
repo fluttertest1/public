@@ -113,9 +113,7 @@
             for (eid in B_IDS) {
                 document.getElementById(B_IDS[eid]).disabled = automatic;
             }
-            if (automatic) {
-                showCharsAutomatically();
-            }
+            showCharsAutomatically();
         };
         function setSpeed() {
             speed = parseInt(document.getElementById('speed').value);
@@ -123,7 +121,16 @@
         function showCharsAutomatically() {
             if (automatic) {
                 setTimeout(showCharsAutomatically, (11 - speed) * 600);
-                getWord();
+                switch(mode) {
+                    case 'V':
+                        getVariations()
+                        break;
+                    case 'F':
+                        getFunnyWord();
+                        break;
+                    default:
+                        getWord();
+                }                
             }
         };
         function readJson() {
